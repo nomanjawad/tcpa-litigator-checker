@@ -152,7 +152,13 @@ class TCPA_Litigator_Checker_Admin
 												?></p>
 			<p><strong>Saved API Key:</strong> <?php //echo esc_html(get_option('tcpa_checker_api_key')); 
 												?></p> -->
+
+			<div class="notice notice-success">
+				<p><strong>New Feature:</strong> This is a test update from GitHub!</p>
+			</div>
+
 		</div>
+
 <?php
 	}
 
