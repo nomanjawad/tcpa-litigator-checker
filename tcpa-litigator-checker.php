@@ -31,7 +31,6 @@ if (!defined('WPINC')) {
 /**
  * Define Plugin Constants
  */
-define('TCPA_LITIGATOR_CHECKER_VERSION', '1.0.0');
 define('TCPA_LITIGATOR_CHECKER_DIR', plugin_dir_path(__FILE__));
 define('TCPA_LITIGATOR_CHECKER_URL', plugin_dir_url(__FILE__));
 
@@ -92,3 +91,22 @@ function run_tcpa_litigator_checker()
 	$plugin->run();
 }
 run_tcpa_litigator_checker();
+
+
+define('TCPA_LITIGATOR_CHECKER_VERSION', get_latest_github_version());
+
+function get_latest_github_version()
+{
+	$github_api_url = 'https://api.github.com/repos/nomanjawad/tcpa-litigator-checker/releases/latest';
+
+	$response = wp_remote_get($github_api_url, [
+		'headers' => ['User-Agent' => 'WordPress']
+	]);
+
+	if (is_wp_error($response)) {
+		return '1.0.0'; // Fallback to a default version if API fails
+	}
+
+	$release_data = json_decode(wp_remote_retrieve_body($response), true);
+	return $release_data['tag_name'] ?? '1.0.0'; // Example: "v1.2.0"
+}
