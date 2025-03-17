@@ -6,13 +6,15 @@ class TCPA_Litigator_Checker_Updater
     public function __construct()
     {
         add_filter('pre_set_site_transient_update_plugins', [$this, 'check_for_update']);
+        add_action('admin_init', [$this, 'force_check_for_updates']); // Force update check
     }
 
     public function check_for_update($transient)
     {
         if (empty($transient->checked)) return $transient;
 
-        $plugin_slug = plugin_basename(__FILE__); // Dynamically get plugin path
+        // Ensure the correct plugin slug is used
+        $plugin_slug = 'tcpa-litigator-checker/tcpa-litigator-checker.php';
 
         // Fetch latest GitHub release
         $response = wp_remote_get($this->github_api_url, [
@@ -22,7 +24,7 @@ class TCPA_Litigator_Checker_Updater
         if (is_wp_error($response)) return $transient;
 
         $release = json_decode(wp_remote_retrieve_body($response), true);
-        if (!$release || !isset($release['tag_name'])) return $transient;
+        if (!$release || !isset($release['tag_name']) || !isset($release['zipball_url'])) return $transient;
 
         // Compare installed vs. latest GitHub version
         if (version_compare(TCPA_LITIGATOR_CHECKER_VERSION, $release['tag_name'], '>=')) return $transient;
@@ -30,11 +32,17 @@ class TCPA_Litigator_Checker_Updater
         // Add update details
         $transient->response[$plugin_slug] = (object) [
             'new_version' => $release['tag_name'],
-            'package' => $release['zipball_url'],
-            'slug' => $plugin_slug,
+            'package' => $release['zipball_url'], // Ensure the package URL exists
+            'slug' => 'tcpa-litigator-checker',
         ];
 
         return $transient;
+    }
+
+    // Force check updates when the admin panel is loaded
+    public function force_check_for_updates()
+    {
+        delete_site_transient('update_plugins');
     }
 }
 new TCPA_Litigator_Checker_Updater();
