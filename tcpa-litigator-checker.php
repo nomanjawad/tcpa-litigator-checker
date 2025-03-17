@@ -13,8 +13,8 @@
  *
  * @wordpress-plugin
  * Plugin Name:       TCPA Litigator Checker
- * Description:       A plugin to check if a phone number is associated with a known TCPA litigator. Using the api form TCPA Litigator List.
- * Version:           1.0.0
+ * Description:       A plugin to check if a phone number is associated with a known TCPA litigator. Using the API from TCPA Litigator List.
+ * Version:           1.2.1
  * Author:            Noman E Jawad
  * Author URI:        https://www.nomanjawad.dev/
  * License:           GPL-2.0+
@@ -31,6 +31,8 @@ if (!defined('WPINC')) {
 /**
  * Define Plugin Constants
  */
+$plugin_data = get_file_data(__FILE__, ['Version' => 'Version']);
+define('TCPA_LITIGATOR_CHECKER_VERSION', $plugin_data['Version']);
 define('TCPA_LITIGATOR_CHECKER_DIR', plugin_dir_path(__FILE__));
 define('TCPA_LITIGATOR_CHECKER_URL', plugin_dir_url(__FILE__));
 
@@ -60,7 +62,6 @@ register_deactivation_hook(__FILE__, 'deactivate_tcpa_litigator_checker');
  */
 require_once TCPA_LITIGATOR_CHECKER_DIR . 'includes/class-tcpa-litigator-checker.php';
 
-
 /**
  * Add Settings link to the plugin page
  *
@@ -74,7 +75,6 @@ function tcpa_litigator_checker_add_settings_link($links)
 }
 
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'tcpa_litigator_checker_add_settings_link');
-
 
 /**
  * Begins execution of the plugin.
@@ -91,22 +91,3 @@ function run_tcpa_litigator_checker()
 	$plugin->run();
 }
 run_tcpa_litigator_checker();
-
-
-define('TCPA_LITIGATOR_CHECKER_VERSION', get_latest_github_version());
-
-function get_latest_github_version()
-{
-	$github_api_url = 'https://api.github.com/repos/nomanjawad/tcpa-litigator-checker/releases/latest';
-
-	$response = wp_remote_get($github_api_url, [
-		'headers' => ['User-Agent' => 'WordPress']
-	]);
-
-	if (is_wp_error($response)) {
-		return '1.0.0'; // Fallback to a default version if API fails
-	}
-
-	$release_data = json_decode(wp_remote_retrieve_body($response), true);
-	return $release_data['tag_name'] ?? '1.0.0'; // Example: "v1.2.0"
-}
